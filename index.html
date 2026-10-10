@@ -356,7 +356,7 @@ html.noemb .c-em .fb{display:block}html.noemb #emb{display:none}
    <form id="lForm" onsubmit="return false">
     <label class="fld"><span>รหัสผ่าน</span><input id="lPw" type="password" autocomplete="current-password"></label>
     <button class="btn big" id="lBtn" type="submit"><span>เข้าสู่ระบบ</span><i>⏎</i></button>
-    <button class="btn ghost big" id="ghBtn" type="button" hidden style="margin-top:10px">เข้าสู่ระบบด้วย GitHub</button>
+    <button class="btn ghost big" id="ghBtn" type="button" style="margin-top:10px">เข้าสู่ระบบด้วย GitHub</button>
     <p class="note" id="lMsg"></p>
    </form>
    <p class="note"><a href="#">← กลับหน้าโดเนท</a></p>
@@ -949,7 +949,6 @@ async function initAdmin(){clock();applyLogo();setNet('off');
   else if(m.t==='resolved'&&m.d&&m.d.id){const r=RECS.find(x=>x.id===m.d.id);if(!r)return;if(m.d.status==='deleted'){RECS=RECS.filter(x=>x!==r);DB.del(r.id).catch(()=>{})}else if(r.status!==m.d.status){r.status=m.d.status;if(r.status==='approved'&&!r.at)r.at=Date.now();save(r)}renderAll()}});
  setInterval(()=>{if(!$('#aDash').hidden)renderQueue()},60000);
  /* GitHub login */
- fetch(API()+'/admin/github/enabled',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&(j.enabled===true||(j.enabled===undefined&&j.ok===true)))$('#ghBtn').hidden=false}).catch(()=>{});
  $('#ghBtn').addEventListener('click',()=>{location.href=API()+'/admin/github/start'});
  const gh=P('gh');
  if(gh){const sp=new URLSearchParams(location.search);sp.delete('gh');const qs=sp.toString();
