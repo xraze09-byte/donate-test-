@@ -7,7 +7,10 @@
 <title>RZ CLAN // RED CYBER TERMINAL</title>
 <script>
 /* ตั้งโหมดก่อน render — กันพื้นหลังดำแวบใน OBS */
-(function(){var h=(location.hash||'').toLowerCase(),m=/^#(overlay|obs|alert)/.test(h)?'ov':/^#goal/.test(h)?'goal':/^#admin/.test(h)?'admin':'donate',c=document.documentElement.classList;c.add('m-'+m);if(m==='ov'||m==='goal')c.add('ov');})();
+(function(){var h=(location.hash||'').toLowerCase(),s=(location.search||'').toLowerCase(),m;
+if(/^#\/?(overlay|obs|alert)/.test(h))m='ov';else if(/^#\/?goal/.test(h))m='goal';
+else if(/^#\/?admin/.test(h)||/[?&](admin|gh)\b/.test(s)||/[?&]gh=/.test(h))m='admin';else m='donate';
+var c=document.documentElement.classList;c.add('m-'+m);if(m==='ov'||m==='goal')c.add('ov');})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -350,9 +353,10 @@ html.noemb .c-em .fb{display:block}html.noemb #emb{display:none}
  <main id="vAdmin" class="view">
   <section id="aLogin" class="login pnl">
    <div class="ph"><span class="mono">SEC</span><h2>Admin Access</h2></div>
-   <form id="lForm">
+   <form id="lForm" onsubmit="return false">
     <label class="fld"><span>รหัสผ่าน</span><input id="lPw" type="password" autocomplete="current-password"></label>
     <button class="btn big" id="lBtn" type="submit"><span>เข้าสู่ระบบ</span><i>⏎</i></button>
+    <button class="btn ghost big" id="ghBtn" type="button" hidden style="margin-top:10px">เข้าสู่ระบบด้วย GitHub</button>
     <p class="note" id="lMsg"></p>
    </form>
    <p class="note"><a href="#">← กลับหน้าโดเนท</a></p>
@@ -509,12 +513,12 @@ html.noemb .c-em .fb{display:block}html.noemb #emb{display:none}
 'use strict';
 /* ================= CORE ================= */
 const $=(s,r)=>(r||document).querySelector(s);
-const $=(s,r)=>Array.prototype.slice.call((r||document).querySelectorAll(s));
+const $$=(s,r)=>Array.prototype.slice.call((r||document).querySelectorAll(s));
 const H=document.documentElement;
 const MODE=H.classList.contains('m-ov')?'ov':H.classList.contains('m-goal')?'goal':H.classList.contains('m-admin')?'admin':'donate';
 const IS_OV=MODE==='ov'||MODE==='goal';
 
-const DEFAULT_KEY='rzclan'; // <<< ใส่ key เดิมจากไฟล์เก่า
+const DEFAULT_KEY='fce4afe701527d17fbef394d';
 const DEF={pp:'',payee:'RZ CLAN',goal:50000,min:20,logo:'',video:'',ws:'wss://donate-backend-60hc.onrender.com/ws',key:DEFAULT_KEY,reqSlip:true,ed:''};
 function P(k){const h=location.hash||'',i=h.indexOf('?'),hp=new URLSearchParams(i>=0?h.slice(i+1):''),sp=new URLSearchParams(location.search);return hp.get(k)!==null?hp.get(k):sp.get(k)}
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
@@ -737,9 +741,9 @@ function initOverlay(){
 
 /* ================= SHARED UI ================= */
 function openM(sel){$(sel).hidden=false;document.body.style.overflow='hidden'}
-function closeM(m){if(!m)return;m.hidden=true;if(!$('.modal').some(x=>!x.hidden))document.body.style.overflow=''}
+function closeM(m){if(!m)return;m.hidden=true;if(!$$('.modal').some(x=>!x.hidden))document.body.style.overflow=''}
 document.addEventListener('click',e=>{const c=e.target.closest('[data-close]');if(c){closeM(c.closest('.modal'));return}if(e.target.classList&&e.target.classList.contains('modal')&&e.target.id!=='cfm')closeM(e.target)});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){const m=$('.modal').filter(x=>!x.hidden).pop();if(m){if(m.id==='cfm')$('#cfmN').click();else closeM(m)}}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){const m=$$('.modal').filter(x=>!x.hidden).pop();if(m){if(m.id==='cfm')$('#cfmN').click();else closeM(m)}}});
 function ask(text){return new Promise(res=>{const m=$('#cfm');$('#cfmT').textContent=text;openM('#cfm');
  const h=e=>{const y=e.target.closest('#cfmY'),n=e.target.closest('#cfmN');if(y||n||e.target===m){m.removeEventListener('click',h);closeM(m);res(!!y)}};m.addEventListener('click',h)})}
 function clock(){const el=$('#clock');const f=()=>{el.textContent=new Date().toLocaleTimeString('en-GB')};f();setInterval(f,1000)}
@@ -753,17 +757,17 @@ function setErr(id,msg){const w=$('#'+id+'_w');if(!w)return;w.classList.toggle('
 function renderGoal(){const goal=+CFG.goal||1,tot=+ST.total||0,pct=Math.min(100,tot/goal*100),on=Math.round(pct/2.5);
  $('#gPct').textContent=pct.toFixed(1)+'%';$('#gGoal').textContent=money(goal);$('#gCnt').textContent=(ST.count||0)+' DONATIONS';$('#gLeft').textContent=tot>=goal?'MISSION COMPLETE':'เหลือ '+money(goal-tot);
  const el=$('#gTot'),from=+el.dataset.v||0;el.dataset.v=tot;const s=performance.now();(function f(n){const k=Math.min(1,(n-s)/900);el.textContent=money(Math.round(from+(tot-from)*(1-Math.pow(1-k,3))));if(k<1)requestAnimationFrame(f)})(s);
- $('#gSeg i').forEach((x,i)=>{x.className=i<on?(i===on-1&&pct<100?'on hd':'on'):''})}
+ $$('#gSeg i').forEach((x,i)=>{x.className=i<on?(i===on-1&&pct<100?'on hd':'on'):''})}
 function renderBoards(){const top=ST.top||[],rec=ST.recent||[];
  $('#lb').innerHTML=top.length?top.map(t=>`<li><span class="n">${esc(t.n)}</span><span class="a">${money(t.a)}</span></li>`).join(''):'<li class="empty" style="border:0;background:none">ยังไม่มีข้อมูล</li>';
  $('#feed').innerHTML=rec.length?rec.map(r=>`<li><div class="r1"><b>${esc(r.n)}</b><span class="a">${money(r.a)}</span></div>${r.m?`<p>${esc(r.m)}</p>`:''}<time>${ago(r.ts)}</time></li>`).join(''):'<li class="empty">รอโดเนทแรก...</li>'}
 function renderMy(){const my=LS.get('rzc_my_v5',[])||[];$('#myBox').hidden=!my.length;const L={pending:'รอตรวจ',approved:'อนุมัติแล้ว',rejected:'ไม่ผ่าน',deleted:'ยกเลิก'};
  $('#myList').innerHTML=my.map(r=>`<li><div class="r1"><b>${esc(r.name)} · <span class="a">${money(r.amount)}</span></b><span class="st ${esc(r.status)}">${L[r.status]||esc(r.status)}</span></div><time>${esc(r.ref)} · ${ago(r.ts)}</time></li>`).join('')}
 function updTier(){const a=+$('#fAmt').value||0,i=tierIdx(a),t=TIERS[i];
- $('#tiersBox div').forEach((d,k)=>{d.classList.toggle('on',a>0&&k<=i);d.classList.toggle('cur',a>0&&k===i)});
+ $$('#tiersBox div').forEach((d,k)=>{d.classList.toggle('on',a>0&&k<=i);d.classList.toggle('cur',a>0&&k===i)});
  const tag=$('#tierTag');tag.textContent=t.n;tag.style.setProperty('--tc',t.c);const nx=TIERS[i+1];
  $('#tNext').textContent=a<=0?'เลือกจำนวนเงินเพื่อดูระดับเอฟเฟกต์บนจอ':nx?`เพิ่มอีก ${money(nx.min-a)} เพื่อปลดล็อก ${nx.n}`:'ระดับสูงสุด — เอฟเฟกต์เต็มพิกัด';
- $('#chips .chip').forEach(c=>c.classList.toggle('on',+c.dataset.v===a));
+ $$('#chips .chip').forEach(c=>c.classList.toggle('on',+c.dataset.v===a));
  if(a>0&&i!==lastTier){lastTier=i;BG.tier(i===4?'#ff2349':t.c,i)}}
 function applyRemote(d){['pp','payee','goal','min','reqSlip','ed'].forEach(k=>{if(d[k]!==undefined)CFG[k]=d[k]});
  if(MODE==='donate')LS.set('rzc_cfg_v4',CFG);if(d.st){ST=d.st;LS.set('rzc_st_v5',ST)}
@@ -885,7 +889,7 @@ function renderQueue(){const list=RECS.filter(r=>r.status==='pending').sort((a,b
  box.innerHTML=list.map(r=>`<div class="pnl qi" data-id="${esc(r.id)}">${r.slip?`<img class="thumb" data-slip="${esc(r.id)}" alt="slip">`:'<div class="thumb nothumb">NO SLIP</div>'}
   <div><div class="meta">${esc(r.ref)} · ${new Date(r.ts).toLocaleString('th-TH')}${r.dup?`<span class="dup">สลิปซ้ำ? ${esc(r.dup)}</span>`:''}</div><h3>${esc(r.name)}</h3><div class="amt2">${money(r.amount)}</div>${r.message?`<p>${esc(r.message)}</p>`:''}</div>
   <div class="act"><button class="btn ok sm" data-act="ok">APPROVE</button><button class="btn ghost sm" data-act="no">REJECT</button></div></div>`).join('');
- $('img[data-slip]',box).forEach(im=>{DB.getSlip(im.dataset.slip).then(s=>{if(s&&s.data)im.src=s.data;else{const d=document.createElement('div');d.className='thumb nothumb';d.textContent='NO DATA';im.replaceWith(d)}}).catch(()=>{})})}
+ $$('img[data-slip]',box).forEach(im=>{DB.getSlip(im.dataset.slip).then(s=>{if(s&&s.data)im.src=s.data;else{const d=document.createElement('div');d.className='thumb nothumb';d.textContent='NO DATA';im.replaceWith(d)}}).catch(()=>{})})}
 function renderHist(){const q=($('#hSearch').value||'').toLowerCase().trim(),f=$('#hFilter').value;const L={pending:'รอตรวจ',approved:'อนุมัติ',rejected:'ไม่ผ่าน'};
  const list=RECS.filter(r=>(f==='all'||r.status===f)&&(!q||(r.name+' '+r.message+' '+r.ref).toLowerCase().indexOf(q)>=0)).sort((a,b)=>b.ts-a.ts).slice(0,300);
  $('#hBody').innerHTML=list.length?list.map(r=>`<tr data-id="${esc(r.id)}"><td class="mono" style="font-size:12px">${new Date(r.ts).toLocaleString('th-TH',{dateStyle:'short',timeStyle:'short'})}</td><td>${esc(r.name)}<div class="meta">${esc(r.ref)}</div></td><td class="a">${money(r.amount)}</td><td class="m">${esc(r.message)}</td><td><span class="st ${esc(r.status)}">${L[r.status]||esc(r.status)}</span></td>
@@ -899,11 +903,13 @@ function ovUrls(){const p=new URLSearchParams();p.set('k',KEY);const pos=$('#oPo
  $('#oUrl').value=BASE+'#overlay?'+p.toString();$('#gUrl').value=BASE+'#goal?k='+encodeURIComponent(KEY);$('#dUrl').value=BASE+'?k='+encodeURIComponent(KEY);
  LS.set('rzc_ovb_v5',{pos,sc,w,v,tts:$('#oTts').checked,sfx:$('#oSfx').checked,goal:$('#oGoal').checked})}
 function fillSettings(){$('#sPp').value=CFG.pp||'';$('#sPayee').value=CFG.payee||'';$('#sGoal').value=CFG.goal;$('#sMin').value=CFG.min;$('#sEd').value=CFG.ed||'';$('#sLogo').value=CFG.logo||'';$('#sVideo').value=CFG.video||'';$('#sWs').value=CFG.ws||DEF.ws;$('#sKey').value=CFG.key;$('#sReq').checked=!!CFG.reqSlip}
-function tab(n){$('#tabs [data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===n));$('.tab').forEach(t=>t.classList.toggle('on',t.dataset.p===n));if(n==='dash')drawChart()}
+function tab(n){$$('#tabs [data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===n));$$('.tab').forEach(t=>t.classList.toggle('on',t.dataset.p===n));if(n==='dash')drawChart()}
 
 function enterAdmin(){sessionStorage.setItem('rzc_adm','1');$('#aLogin').hidden=true;$('#aDash').hidden=false;Net.connect();keepAlive();fillSettings();ovUrls();renderAll()}
-async function initAdmin(){clock();applyLogo();setNet('off');await DB.open();
- RECS=(await DB.all().catch(()=>null))||LS.get('rzc_db_v5',[])||[];
+async function initAdmin(){clock();applyLogo();setNet('off');
+ const tmo=(p,ms)=>Promise.race([p,new Promise(r=>setTimeout(()=>r(null),ms))]);
+ await tmo(DB.open(),3000);
+ RECS=(await tmo(DB.all().catch(()=>null),3000))||LS.get('rzc_db_v5',[])||[];
  if(!RECS.length){const old=LS.get('rzc_db_v4',null);let arr=Array.isArray(old)?old:old&&(old.list||old.items||old.don||old.donations);if(!Array.isArray(arr)&&old&&typeof old==='object')arr=Object.keys(old).map(k=>old[k]);
   (arr||[]).filter(r=>r&&typeof r==='object'&&r.id&&r.amount!=null).forEach(r=>{const x={id:String(r.id),name:clean(r.name).slice(0,40)||'?',amount:+r.amount||0,message:clean(r.message).slice(0,300),ts:+r.ts||Date.now(),status:r.status||'approved',ref:String(r.ref||''),slip:false};RECS.push(x);save(x)});
   if(RECS.length)toast('ย้ายข้อมูลเก่า '+RECS.length+' รายการแล้ว','ok')}
@@ -942,10 +948,26 @@ async function initAdmin(){clock();applyLogo();setNet('off');await DB.open();
  sub('msg',m=>{if(m.t==='donation'&&m.d)onDonation(m.d);else if(m.t==='sync')bcast();
   else if(m.t==='resolved'&&m.d&&m.d.id){const r=RECS.find(x=>x.id===m.d.id);if(!r)return;if(m.d.status==='deleted'){RECS=RECS.filter(x=>x!==r);DB.del(r.id).catch(()=>{})}else if(r.status!==m.d.status){r.status=m.d.status;if(r.status==='approved'&&!r.at)r.at=Date.now();save(r)}renderAll()}});
  setInterval(()=>{if(!$('#aDash').hidden)renderQueue()},60000);
+ /* GitHub login */
+ fetch(API()+'/admin/github/enabled',{cache:'no-store'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&(j.enabled===true||(j.enabled===undefined&&j.ok===true)))$('#ghBtn').hidden=false}).catch(()=>{});
+ $('#ghBtn').addEventListener('click',()=>{location.href=API()+'/admin/github/start'});
+ const gh=P('gh');
+ if(gh){const sp=new URLSearchParams(location.search);sp.delete('gh');const qs=sp.toString();
+  history.replaceState(null,'',location.pathname+(qs?'?'+qs:'')+'#admin');
+  $('#lMsg').textContent='กำลังยืนยันตัวตนกับ GitHub...';
+  try{const r=await fetch(API()+'/admin/github/exchange',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:gh})});
+   const j=await r.json().catch(()=>({}));
+   if(r.ok&&j.token){sessionStorage.setItem('rzc_srvtok',j.token);$('#lMsg').textContent='';enterAdmin();return}
+   $('#lMsg').textContent='GitHub login ไม่สำเร็จ ลองใหม่อีกครั้ง'}
+  catch(e){$('#lMsg').textContent='เชื่อมต่อเซิร์ฟเวอร์ไม่ได้'}}
  if(sessionStorage.getItem('rzc_adm')==='1'){const c=Net.tok()?await AUTH.check():'local';if(c===false){sessionStorage.removeItem('rzc_adm');sessionStorage.removeItem('rzc_srvtok')}else enterAdmin()}
  else $('#lPw').focus()}
 
 /* ================= BOOT ================= */
+function modeOf(){const h=(location.hash||'').toLowerCase(),s=(location.search||'').toLowerCase();
+ if(/^#\/?(overlay|obs|alert)/.test(h))return 'ov';if(/^#\/?goal/.test(h))return 'goal';
+ if(/^#\/?admin/.test(h)||/[?&](admin|gh)\b/.test(s)||/[?&]gh=/.test(h))return 'admin';return 'donate'}
+addEventListener('hashchange',()=>{if(modeOf()!==MODE)location.reload()});
 Q.init();
 if(IS_OV){initOverlay();Net.connect();keepAlive()}
 else{BG.init();if(MODE==='admin')initAdmin();else{clock();initDonate();Net.connect()}}
