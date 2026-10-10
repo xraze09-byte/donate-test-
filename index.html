@@ -232,7 +232,7 @@ html.ov,html.ov body{background:transparent!important;overflow:hidden;min-height
 html.ov #bg3d,html.ov .bgfx,html.ov #app{display:none!important}
 #ov{display:none}
 html.ov #ov{display:block;position:fixed;inset:0;pointer-events:none}
-#edge{position:fixed;inset:0;opacity:0;box-shadow:inset 0 0 90px 8px var(--ec,#ff2349)}
+#edge{position:fixed;inset:0;opacity:0;box-shadow:inset 0 0 50px 2px var(--ec,#ff2349)}
 #edge.go{animation:edge 1.8s ease-out}
 #ovBox{--tc:#ff2349;position:absolute;width:440px;perspective:1000px;visibility:hidden}
 #ovBox.live{visibility:visible}
@@ -240,7 +240,7 @@ html.gv-2 #ovBox.live,html.gv-3 #ovBox.live{filter:drop-shadow(0 0 16px var(--tg
 #tilt{transform-style:preserve-3d}
 #ovBox.live #tilt{animation:sway 5s ease-in-out infinite}
 html.gv-0 #ovBox.live #tilt{animation:none}
-#fx{position:absolute;left:-90px;top:-90px;width:calc(100% + 180px);height:calc(100% + 180px);pointer-events:none;z-index:3}
+#fx{position:absolute;left:-40px;top:-40px;width:calc(100% + 80px);height:calc(100% + 80px);pointer-events:none;z-index:3}
 .card{position:relative;display:grid;grid-template-columns:120px minmax(0,1fr);column-gap:16px;align-items:center;padding:14px 22px 16px 12px;color:#fff;
  background:repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 1px,transparent 1px 22px),linear-gradient(115deg,rgba(24,6,11,.95),rgba(8,3,5,.92));
  box-shadow:inset 0 0 0 1px var(--tc),inset 0 0 40px rgba(255,35,73,.14);
@@ -288,12 +288,12 @@ html.noemb .c-em .fb{display:block}html.noemb #emb{display:none}
 @keyframes shake{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
 @keyframes cIn{0%{opacity:0;transform:rotateX(-85deg) translateY(-30px) scale(.88)}50%{opacity:1}100%{opacity:1;transform:none}}
 @keyframes cOut{0%{opacity:1;transform:none}100%{opacity:0;transform:rotateX(75deg) translateY(24px) scale(.9)}}
-@keyframes sway{0%,100%{transform:rotateY(-6deg) rotateX(3deg)}50%{transform:rotateY(6deg) rotateX(-3deg)}}
+@keyframes sway{0%,100%{transform:rotateY(-3deg) rotateX(1.5deg)}50%{transform:rotateY(3deg) rotateX(-1.5deg)}}
 @keyframes sweep{to{transform:translateX(110%)}}
 @keyframes nameG{0%{transform:translateX(4px);text-shadow:-3px 0 #6ff3ff,3px 0 var(--tc)}50%{transform:translateX(-3px)}100%{transform:none}}
 @keyframes shine{to{background-position:-200% 0}}
 @keyframes fbs{from{transform:rotate(45deg) rotateY(0)}to{transform:rotate(45deg) rotateY(360deg)}}
-@keyframes edge{0%{opacity:0}15%{opacity:.85}100%{opacity:0}}
+@keyframes edge{0%{opacity:0}15%{opacity:.45}100%{opacity:0}}
 @media (prefers-reduced-motion:reduce){html:not(.ov) *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 </style>
 </head>
@@ -398,8 +398,8 @@ html.noemb .c-em .fb{display:block}html.noemb #emb{display:none}
       <div class="ph"><span class="mono">OBS</span><h2>Overlay Builder</h2></div>
       <div class="form2">
        <label class="fld"><span>ตำแหน่ง Alert</span><select id="oPos"><option value="tc">บน-กลาง</option><option value="tl">บน-ซ้าย</option><option value="tr">บน-ขวา</option><option value="bc">ล่าง-กลาง</option><option value="bl">ล่าง-ซ้าย</option><option value="br">ล่าง-ขวา</option><option value="c">กลางจอ</option></select></label>
-       <div class="fld"><span>ขนาด (Scale)</span><div class="rng"><input type="range" id="oScale" min="0.5" max="1.6" step="0.05" value="1"><output id="oScaleV">1×</output></div></div>
-       <div class="fld"><span>ความกว้างการ์ด</span><div class="rng"><input type="range" id="oW" min="320" max="640" step="10" value="440"><output id="oWV">440px</output></div></div>
+       <div class="fld"><span>ขนาด (Scale)</span><div class="rng"><input type="range" id="oScale" min="0.3" max="1.6" step="0.05" value="0.65"><output id="oScaleV">0.65×</output></div></div>
+       <div class="fld"><span>ความกว้างการ์ด</span><div class="rng"><input type="range" id="oW" min="320" max="640" step="10" value="400"><output id="oWV">400px</output></div></div>
        <div class="fld"><span>เสียง</span><div class="rng"><input type="range" id="oVol" min="0" max="1" step="0.05" value="0.8"><output id="oVolV">80%</output></div></div>
       </div>
       <label class="sw"><input type="checkbox" id="oTts" checked> อ่านข้อความ (TTS)</label>
@@ -692,7 +692,7 @@ const FX={cv:null,x:null,ps:[],rs:[],run:false,d:1,
   x.globalAlpha=1;if(this.ps.length||this.rs.length)requestAnimationFrame(()=>this.loop());else{this.run=false;x.setTransform(1,0,0,1,0,0);x.clearRect(0,0,this.cv.width,this.cv.height)}}};
 
 /* ================= OVERLAY ================= */
-function countUp(el,to,ms){const s=performance.now(),dec=to%1?2:0;(function f(n){const k=Math.min(1,(n-s)/ms),e=1-Math.pow(1-k,4);el.textContent=(to*e).toLocaleString('en-US',{minimumFractionDigits:dec,maximumFractionDigits:dec});if(k<1)requestAnimationFrame(f)})(s)}
+function countUp(el,to,ms){const s=performance.now(),dec=Math.round(to*100)%100?2:0,fmt=v=>v.toLocaleString('th-TH',{minimumFractionDigits:dec,maximumFractionDigits:dec});(function f(n){const k=Math.min(1,(n-s)/ms),e=1-Math.pow(1-k,4);el.textContent=fmt(k>=1?to:to*e);if(k<1)requestAnimationFrame(f)})(s)}
 function placeBox(el,pos,sc,m){const s=el.style;s.left=s.right=s.top=s.bottom='auto';
  if(pos==='c'){s.top='50%';s.left='50%';s.transform=`translate(-50%,-50%) scale(${sc})`;s.transformOrigin='center';return}
  const v=pos[0],h=pos[1]||'c';let tx='0',org='center';
@@ -728,7 +728,7 @@ function goalRender(d){const st=(d&&d.st)||LS.get('rzc_st_v5',null)||{};const go
  $('#gwTot').textContent=money(tot);$('#gwGoal').textContent='/ '+money(goal);$('#gwBar').style.transform=`scaleX(${pct/100})`;
  const top=st.top&&st.top[0];$('#gwTop').textContent=top?`TOP SUPPORTER: ${top.n} — ${money(top.a)}`:'';}
 function initOverlay(){
- const sc=Math.max(.3,Math.min(2.5,parseFloat(P('scale'))||1)),m=Math.max(0,parseInt(P('margin'))||40),w=Math.max(300,Math.min(720,parseInt(P('w'))||440));
+ const sc=Math.max(.3,Math.min(2.5,parseFloat(P('scale'))||.65)),m=Math.max(0,parseInt(P('margin'))||24),w=Math.max(300,Math.min(720,parseInt(P('w'))||400));
  TTS.on=P('tts')!=='0';SFX.on=P('sfx')!=='0';
  if(MODE==='ov'){$('#ovBox').style.width=w+'px';placeBox($('#ovBox'),(P('pos')||'tc').toLowerCase(),sc,m);EMB.init()}else $('#ovBox').hidden=true;
  if(MODE==='goal'||P('goal')==='1'){const g=$('#gw');g.hidden=false;placeBox(g,(P('gpos')||(MODE==='goal'?'tl':'bl')).toLowerCase(),Math.max(.3,Math.min(2.5,parseFloat(P('gscale'))||sc)),m);goalRender(null)}
@@ -898,7 +898,7 @@ function csv(){const fx=v=>{v=String(v==null?'':v);if(/^[=+\-@]/.test(v))v="'"+v
  const rows=[['time','name','amount','message','status','ref']].concat(RECS.slice().sort((a,b)=>a.ts-b.ts).map(r=>[new Date(r.ts).toISOString(),r.name,r.amount,r.message,r.status,r.ref]));
  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+rows.map(r=>r.map(fx).join(',')).join('\r\n')],{type:'text/csv'}));a.download='rz-donations-'+new Date().toISOString().slice(0,10)+'.csv';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),3000)}
 function ovUrls(){const p=new URLSearchParams();p.set('k',KEY);const pos=$('#oPos').value,sc=$('#oScale').value,w=$('#oW').value,v=$('#oVol').value;
- if(pos!=='tc')p.set('pos',pos);if(+sc!==1)p.set('scale',sc);if(+w!==440)p.set('w',w);if(!$('#oTts').checked)p.set('tts','0');if(!$('#oSfx').checked)p.set('sfx','0');if(+v!==.8)p.set('vol',v);if($('#oGoal').checked)p.set('goal','1');
+ if(pos!=='tc')p.set('pos',pos);if(+sc!==.65)p.set('scale',sc);if(+w!==400)p.set('w',w);if(!$('#oTts').checked)p.set('tts','0');if(!$('#oSfx').checked)p.set('sfx','0');if(+v!==.8)p.set('vol',v);if($('#oGoal').checked)p.set('goal','1');
  $('#oScaleV').textContent=(+sc).toFixed(2)+'×';$('#oWV').textContent=w+'px';$('#oVolV').textContent=Math.round(v*100)+'%';
  $('#oUrl').value=BASE+'#overlay?'+p.toString();$('#gUrl').value=BASE+'#goal?k='+encodeURIComponent(KEY);$('#dUrl').value=BASE+'?k='+encodeURIComponent(KEY);
  LS.set('rzc_ovb_v5',{pos,sc,w,v,tts:$('#oTts').checked,sfx:$('#oSfx').checked,goal:$('#oGoal').checked})}
@@ -925,11 +925,11 @@ async function initAdmin(){clock();applyLogo();setNet('off');
  $('#hBody').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const id=b.closest('tr').dataset.id,a=b.dataset.act;
   if(a==='ok')approve(id);else if(a==='del')delRec(id);else if(a==='slip')viewSlip(id);else if(a==='re'){const r=RECS.find(x=>x.id===id);if(r){Net.send({t:'alert',d:Object.assign(alertOf(r),{id:r.id+'-r'+Date.now().toString(36)})});toast('ส่ง Alert ซ้ำแล้ว','ok')}}});
  let hT;$('#hSearch').addEventListener('input',()=>{clearTimeout(hT);hT=setTimeout(renderHist,150)});$('#hFilter').addEventListener('change',renderHist);$('#hCsv').addEventListener('click',csv);
- const ob=LS.get('rzc_ovb_v5',null);if(ob){$('#oPos').value=ob.pos||'tc';$('#oScale').value=ob.sc||1;$('#oW').value=ob.w||440;$('#oVol').value=ob.v!=null?ob.v:.8;$('#oTts').checked=ob.tts!==false;$('#oSfx').checked=ob.sfx!==false;$('#oGoal').checked=!!ob.goal}
+ const ob=LS.get('rzc_ovb_v5',null);if(ob){$('#oPos').value=ob.pos||'tc';$('#oScale').value=ob.sc||.65;$('#oW').value=ob.w||400;$('#oVol').value=ob.v!=null?ob.v:.8;$('#oTts').checked=ob.tts!==false;$('#oSfx').checked=ob.sfx!==false;$('#oGoal').checked=!!ob.goal}
  ['oPos','oScale','oW','oVol','oTts','oSfx','oGoal'].forEach(id=>$('#'+id).addEventListener('input',ovUrls));
  document.addEventListener('click',e=>{const c=e.target.closest('[data-copy]');if(c)copyTxt($('#'+c.dataset.copy).value)});
  $('#tests').innerHTML=TIERS.map((t,i)=>`<button class="btn ghost sm" data-ti="${i}" style="box-shadow:inset 0 0 0 1px ${t.c};color:${t.c}">${t.n}</button>`).join('');
- $('#tests').addEventListener('click',e=>{const b=e.target.closest('[data-ti]');if(!b)return;const t=TIERS[+b.dataset.ti];Net.send({t:'alert',d:{id:'test-'+uid(),name:'TEST '+t.n,amount:t.min||50,message:'ทดสอบระบบแจ้งเตือน // RZ RED CYBER',test:true}});toast('ส่ง Test Alert: '+t.n,'ok')});
+ $('#tests').addEventListener('click',e=>{const b=e.target.closest('[data-ti]');if(!b)return;const t=TIERS[+b.dataset.ti];Net.send({t:'alert',d:{id:'test-'+uid(),name:'TEST '+t.n,amount:Math.max(50,t.min),message:'ทดสอบระบบแจ้งเตือน // RZ RED CYBER',test:true}});toast('ส่ง Test Alert: '+t.n,'ok')});
  $('#pvBtn').addEventListener('click',()=>{const pv=$('#pv');pv.hidden=false;pv.innerHTML='';const f=document.createElement('iframe');f.src=$('#oUrl').value+'&q=1';pv.appendChild(f);const fit=()=>{f.style.transform=`scale(${pv.clientWidth/1920})`};fit();addEventListener('resize',fit);$('#pvBtn').textContent='RELOAD PREVIEW'});
  $('#mAdd').addEventListener('click',async()=>{const name=clean($('#mName').value).slice(0,40),amt=Math.round((+$('#mAmt').value||0)*100)/100,msg=clean($('#mMsg').value).slice(0,300);
   if(!name||!(amt>0)){toast('กรอกชื่อและจำนวนเงิน');return}const r={id:uid(),name,amount:amt,message:msg,ts:Date.now(),at:Date.now(),status:'approved',ref:'MAN-'+Math.random().toString(36).slice(2,6).toUpperCase(),slip:false};
